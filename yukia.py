@@ -20,12 +20,6 @@ names_table = Table('names', meta_data,
 
 items_table = Table('items', meta_data,
     Column('iid', Integer, primary_key=True),         # item id (unique)
-    Column('nid', Integer, ForeignKey('names.nid')),  # name id 
-    Column('sid', Integer, ForeignKey('stock.sid')),  # stock id
-)
-
-items_table = Table('items', meta_data,
-    Column('iid', Integer, primary_key=True),         # item id (unique)
     Column('nid', Integer, ForeignKey('names.nid')),  # name id
     Column('sid', Integer, ForeignKey('stock.sid')),  # stock id
     Column('lid', Integer, ForeignKey('labels.lid')), # label id
