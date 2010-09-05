@@ -30,7 +30,7 @@ labels_table = Table('labels', meta_data,
     Column('name', String(30)),
 )
 
-processes_table = Table('items', meta_data,
+processes_table = Table('processes', meta_data,
     Column('pid', Integer, primary_key=True),
     Column('name', String(40)),
     Column('item', Integer, ForeignKey('items.iid')), # producer id ( a kind of label for process )
