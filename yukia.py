@@ -3,8 +3,10 @@ from sqlalchemy import MetaData
 from sqlalchemy import Table, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import mapper, relation, backref
 from sqlalchemy.orm import sessionmaker
-engine = create_engine('postgresql://inyuki_yukia:7cd26db5@localhost/inyuki_yukia', echo=False, useexisting=True)
+engine = create_engine('postgresql://inyuki_yukia:7cd26db5@localhost/inyuki_yukia', echo=False)
 meta_data = MetaData()
+
+meta_data.drop_all(engine)
 
 # Creating database model
 
@@ -21,7 +23,7 @@ names_table = Table('names', meta_data,
 items_table = Table('items', meta_data,
     Column('iid', Integer, primary_key=True),         # item id (unique)
     Column('nid', Integer, ForeignKey('names.nid')),  # name id
-    Column('sid', Integer, ForeignKey('stock.sid')),  # stock id
+    Column('sid', Integer, ForeignKey('stocks.sid')),  # stock id
     Column('lid', Integer, ForeignKey('labels.lid')), # label id
 ) 
 
