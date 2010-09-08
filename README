@@ -4,10 +4,16 @@ Goal tracking and resource management...
 
 The software is intended for management of personal or family's  assets, simplifying bookeeping, and tracking of personal or family's performance, as well as helping to make trading decisions by simplifying data collection, access and analysis of various markets and resources.
 
+Definitions of terms used in this software code:
+
+* Stock: a house or an apartment, geographically separate unit for storage and living of "Items".
+* Item: a animate or inanimate thing, which can be living or be stored at home. Three main "Labels" for items could be "Producers", "Raw Materials" and "Currencies". Producers could be humans or machines.
+
+Notes about my progress: 
 
 Currently I am creating the yukia.py Python script.
 
 - I decided to firstly create the program with classes of Python and a database, and only later think anything about web GUI.
 - I decided to use SQLAlchemy for the project.
-- I am currently in the process of writing database schema in UML.
+- I am currently in the process of writing database schema in SQLAlchemy commands, and later drawing an UML schema.
 
