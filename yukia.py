@@ -16,7 +16,18 @@ class Stock(Base):
     def __repr__(self):
         return "Stock(%r)" % (self.name)
 
-class Name(Base):
+class Type(Base):                      # Generalizations for names. I.e., Sandwitch, Eggs.
+    __tablename__ = 'types'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(30), nullable=False, unique=True)
+
+    def __init__(self, name=None):
+        self.name = name
+    def __repr__(self):
+        return "Type(%r)" % (self.name)
+
+class Name(Base):                      # Particular names, i.e., "McChicken"
     __tablename__ = 'names'
 
     id = Column(Integer, primary_key=True)
@@ -26,6 +37,8 @@ class Name(Base):
         self.name = name
     def __repr__(self):
         return "Name(%r)" % (self.name)
+    # So, an item name is fully specified by Type and Name, i.e., [Sandwitch][McChiken]
+
 
 class Label(Base):      # Labels will be used to categorize Items.
     __tablename__ = 'labels'
@@ -42,10 +55,12 @@ class Item(Base):
     __tablename__ = 'items'
 
     id = Column(Integer, primary_key=True)
-    named_by = Column(Integer, ForeignKey('names.id'), nullable=False)
-    stocked_at = Column(Integer, ForeignKey('stocks.id'), nullable=False)
+    typed_as = Column(Integer, ForeignKey('types.id'), nullable=False, unique=True)  # i.e., "Sandwitch"
+    named_by = Column(Integer, ForeignKey('names.id'), nullable=True, unique=True)  # i.e., "McChicken"
+    stocked_at = Column(Integer, ForeignKey('stocks.id'), nullable=False)   # i.e., London, New York
     labeled_with = Column(Integer, ForeignKey('labels.id'), nullable=False) # i.e., Producer, Raw material, Currency
 
+    type = relation("Type", backref='types', lazy=False)
     name = relation("Name", backref='items', lazy=False)
     stock = relation("Stock", backref='items', lazy=False)
     label = relation("Label", backref='items', lazy=False)
@@ -103,6 +118,7 @@ class Performance(Base):
     # The object(s) should be written to database and recreated if the hour doesn't match the current one.
     # No need for frequent cron jobs, because the time when the object was created is memorized.
     # One cron job in the end of the working day is sufficient to include the last hour data of the day.
+
 
 engine = create_engine('sqlite:///yukia.db', echo=False)
 Base.metadata.create_all(engine)
