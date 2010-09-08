@@ -1,12 +1,13 @@
 Yukia
 +++++
-
 Goal tracking and resource management...
+
+The software is intended for management of personal or family's  assets, simplifying bookeeping, and tracking of personal or family's performance, as well as helping to make trading decisions by simplifying data collection, access and analysis of various markets and resources.
+
 
 Currently I am creating the yukia.py Python script.
 
 - I decided to firstly create the program with classes of Python and a database, and only later think anything about web GUI.
-
 - I decided to use SQLAlchemy for the project.
-
 - I am currently in the process of writing database schema in UML.
+
