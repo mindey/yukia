@@ -68,7 +68,7 @@ class Item(Base):
     def __init__(self):
         pass
     def __repr__(self):
-        return "Item(%r, %r, %r)" % (self.name, self.stock, self.label)
+        return "Item(%r, %r, %r, %r)" % (self.type, self.name, self.stock, self.label)
 
 class Process(Base):
     __tablename__ = 'processes'
@@ -140,12 +140,15 @@ class Source(Base):      # Prototype for issuing Items.
     labeled_with = Column(Integer, ForeignKey('labels.id'), nullable=False) # i.e., Producer, Raw material, Currency
     # quantity = Column(Integer, nullable=False) # Temporarily considered to be limitless.
 
+    type = relation("Type", backref='types', lazy=False)
+    name = relation("Name", backref='items', lazy=False)
     market = relation("Market", backref='sources', lazy=False)
+    label = relation("Label", backref='items', lazy=False)
  
     def __init__(self, name='Home'):
         pass 
     def __repr__(self):
-        return "Source(%r)" % (self.name) 
+        return "Source(%r, %r, %r, %r)" % (self.type, self.name, self.market, self.label) 
 
 engine = create_engine('sqlite:///yukia.db', echo=False)
 Base.metadata.create_all(engine)
