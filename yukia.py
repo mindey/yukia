@@ -1,6 +1,7 @@
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relation, sessionmaker
+from time import time
 
 Base = declarative_base()
 
@@ -8,7 +9,7 @@ class Stock(Base):
     __tablename__ = 'stocks'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(30))
+    name = Column(String(30), nullable=False, unique=True)
 
     def __init__(self, name=None):
         self.name = name
@@ -19,18 +20,18 @@ class Name(Base):
     __tablename__ = 'names'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(40))
+    name = Column(String(40), nullable=False, unique=True)
 
     def __init__(self, name=None):
         self.name = name
     def __repr__(self):
         return "Name(%r)" % (self.name)
 
-class Label(Base):
+class Label(Base):      # Labels will be used to categorize Items.
     __tablename__ = 'labels'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(40))
+    name = Column(String(40), nullable=False, unique=True)
 
     def __init__(self, name=None):
         self.name = name
@@ -41,9 +42,9 @@ class Item(Base):
     __tablename__ = 'items'
 
     id = Column(Integer, primary_key=True)
-    named_by = Column(Integer, ForeignKey('names.id'))
-    stocked_at = Column(Integer, ForeignKey('stocks.id'))
-    labeled_with = Column(Integer, ForeignKey('labels.id'))
+    named_by = Column(Integer, ForeignKey('names.id'), nullable=False)
+    stocked_at = Column(Integer, ForeignKey('stocks.id'), nullable=False)
+    labeled_with = Column(Integer, ForeignKey('labels.id'), nullable=False) # i.e., Producer, Raw material, Currency
 
     name = relation("Name", backref='items', lazy=False)
     stock = relation("Stock", backref='items', lazy=False)
@@ -58,7 +59,7 @@ class Process(Base):
     __tablename__ = 'processes'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(40))
+    name = Column(String(40), nullable=False)
     owned_by = Column(Integer, ForeignKey('items.id'))
 
     item = relation("Item", backref='processes', lazy=False)
@@ -72,7 +73,7 @@ class Unit(Base):
     __tablename__ = 'units'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(40))
+    name = Column(String(40), nullable=False)
     owned_by = Column(Integer, ForeignKey('processes.id'))
 
     process = relation("Process", backref='units', lazy=False)
@@ -82,5 +83,26 @@ class Unit(Base):
     def __repr__(self):
         return "Unit(%r, %r)" % (self.name, self.process)
 
-engine = create_engine('postgresql://inyuki_yukia:7cd26db5@localhost/inyuki_yukia', echo=False)
+class Performance(Base):
+    __tablename__ = 'performances'
+
+    id = Column(Integer, primary_key=True)                  
+    hour = Column(Integer, unique=True)                    # Unique hour since 1/1/1970. 
+    total = Column(Integer)                                # Total production amount in the hour. 
+    owned_by = Column(Integer, ForeignKey('processes.id')) # The process measured.
+    measured_by = Column(Integer, ForeignKey('units.id'))  # The measurement units.
+
+    process = relation("Process", backref='performances', lazy=False)
+    unit = relation("Unit", backref='units', lazy=False)
+
+    def __init__(self, hour=0, total=0):
+        self.id = int(time.time())/3600 # As perofrmance is measured, the hour id is calculated.
+        self.total = total
+    def __repr__(self):
+        return "Performance(%r, %r, %r)" % (self.total, self.process, self.unit)
+    # The object(s) should be written to database and recreated if the hour doesn't match the current one.
+    # No need for frequent cron jobs, because the time when the object was created is memorized.
+    # One cron job in the end of the working day is sufficient to include the last hour data of the day.
+
+engine = create_engine('sqlite:///yukia.db', echo=False)
 Base.metadata.create_all(engine)
