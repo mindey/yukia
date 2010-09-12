@@ -51,6 +51,17 @@ class Label(Base):      # To be used to sort Items into "Producers", "Raw Materi
     def __repr__(self):
         return "Label(%r)" % (self.name)
 
+class Quant(Base):             # Smallest Unit for counting Items,   
+    __tablename__ = 'quants'   # i.e., Quant of [Milk "Milkyway"] = 0.5 liter pack 
+                               # i.e., Quant of [Orange Juice "Slee"] = 0.5 liter pack
+    id = Column(Integer, primary_key=True)
+    name = Column(String(40), nullable=False)
+
+    def __init__(self, name=None):
+        self.name = name
+    def __repr__(self):
+        return "Quant(%r, %r)" % (self.name)
+
 class Item(Base):
     __tablename__ = 'items'
 
@@ -59,16 +70,18 @@ class Item(Base):
     named_by = Column(Integer, ForeignKey('names.id'), nullable=True)  # i.e., "McChicken"
     stocked_at = Column(Integer, ForeignKey('stocks.id'), nullable=False)   # i.e., London, New York
     labeled_with = Column(Integer, ForeignKey('labels.id'), nullable=False) # i.e., Producer, Raw material, Currency
+    quantized_by = Column(Integer, ForeignKey('quants.id'), nullable=False) # i.e., 0.5 liter pack 
 
     type = relation("Type", backref='types', lazy=False)
     name = relation("Name", backref='items', lazy=False)
     stock = relation("Stock", backref='items', lazy=False)
     label = relation("Label", backref='items', lazy=False)
+    quant = relation("Quant", backref='quants', lazy=False)
 
     def __init__(self):
         pass
     def __repr__(self):
-        return "Item(%r, %r, %r, %r)" % (self.type, self.name, self.stock, self.label)
+        return "Item(%r, %r, %r, %r, %r)" % (self.type, self.name, self.stock, self.label, self.quant)
 
 class Process(Base):
     __tablename__ = 'processes'
@@ -84,8 +97,8 @@ class Process(Base):
     def __repr__(self):
         return "Process(%r, %r)" % (self.name, self.item)
 
-class Unit(Base):
-    __tablename__ = 'units'
+class Unit(Base):                            # For measuring Performances of each Process
+    __tablename__ = 'units'                  # Each Process should have a unique set of Units 
 
     id = Column(Integer, primary_key=True)
     name = Column(String(40), nullable=False)
@@ -138,17 +151,33 @@ class Source(Base):      # Prototype for issuing Items.
     named_by = Column(Integer, ForeignKey('names.id'), nullable=True)  # i.e., "McChicken"
     marketed_in = Column(Integer, ForeignKey('markets.id')) # Thought: MarketID = 1 -> Home 
     labeled_with = Column(Integer, ForeignKey('labels.id'), nullable=False) # i.e., Producer, Raw material, Currency
-    # quantity = Column(Integer, nullable=False) # Temporarily considered to be limitless.
+    quantized_by = Column(Integer, ForeignKey('quants.id'), nullable=False) # i.e., 0.5 liter pack 
 
     type = relation("Type", backref='types', lazy=False)
     name = relation("Name", backref='items', lazy=False)
     market = relation("Market", backref='sources', lazy=False)
     label = relation("Label", backref='items', lazy=False)
+    quant = relation("Quant", backref='quants', lazy=False)
  
     def __init__(self, name='Home'):
         pass 
     def __repr__(self):
-        return "Source(%r, %r, %r, %r)" % (self.type, self.name, self.market, self.label) 
+        return "Source(%r, %r, %r, %r, %r)" % (self.type, self.name, self.market, self.label, self.quant) 
+
+#class Exchange(Base):
+#    __tablename__ = 'exchanges'
+#
+#    id = Column(Integer, primary_key=True)
+#    exchanged_for = Column(Dictionary)  # i.e. {Item1: Quantity1, Item2 : Quantity2, ...}  (labeled as currency)
+#    exchanged_into = Column(Dictionary) # i.e. {Source1: Quantity1, Source2: Quantity2, ...}
+
+#class Transaction(Base):
+#    __tablename__ = 'transactions'
+#
+#    id = Column(Integer, primary_key=True)
+#    time = Column(Float)
+#    content = Column(Set)               # i.e. [exchange1, exchange2,...] 
+
 
 engine = create_engine('sqlite:///yukia.db', echo=False)
 Base.metadata.create_all(engine)
